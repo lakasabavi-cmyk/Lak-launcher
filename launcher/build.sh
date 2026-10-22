@@ -1,5 +1,5 @@
 #!/bin/bash
-# Manual Android build pipeline (no Gradle) for MTH Launcher.
+# Manual Android build pipeline (no Gradle) for Lak Launcher.
 # Language packs in lang/*.txt are copied into the APK assets at build
 # time, so adding a language to a build is literally "drop a .txt in lang/".
 set -e
@@ -65,11 +65,11 @@ if [ ! -f keystore.jks ]; then
 fi
 "$BT/apksigner" sign --ks keystore.jks --ks-pass pass:n1launcher --key-pass pass:n1launcher \
   --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
-  --out output/MTH-Launcher-v2.5.apk "$OUT/app-aligned.apk"
+  --out output/Lak-Launcher-v2.6.apk "$OUT/app-aligned.apk"
 
 echo "== verify =="
-"$BT/apksigner" verify --verbose output/MTH-Launcher-v2.5.apk
-"$BT/aapt2" dump badging output/MTH-Launcher-v2.5.apk | head -5
-sha256sum output/MTH-Launcher-v2.5.apk; ls -l output/MTH-Launcher-v2.5.apk
+"$BT/apksigner" verify --verbose output/Lak-Launcher-v2.6.apk
+"$BT/aapt2" dump badging output/Lak-Launcher-v2.6.apk | head -5
+sha256sum output/Lak-Launcher-v2.6.apk; ls -l output/Lak-Launcher-v2.6.apk
 ls -lh output/
 echo "BUILD OK"

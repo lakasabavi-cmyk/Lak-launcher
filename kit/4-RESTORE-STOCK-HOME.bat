@@ -1,5 +1,5 @@
 @echo off
-title MTH Kit - 4. Restore stock Bonfire home
+title Lak Kit - 4. Restore stock Bonfire home
 cd /d %~dp0
 set IP=
 if exist ip.txt set /p IP=<ip.txt
@@ -14,7 +14,7 @@ adb connect %IP%:5555
 
 echo ============================================================
 echo  RESTORE: re-enable the stock JMGO launcher and set it
-echo  back as the default Home. MTH Launcher stays installed
+echo  back as the default Home. Lak Launcher stays installed
 echo  but unused.
 echo ============================================================
 echo.

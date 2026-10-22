@@ -1,6 +1,6 @@
 # Language packs
 
-Every UI string of MTH Launcher lives in a plain-text pack in this folder.
+Every UI string of Lak Launcher lives in a plain-text pack in this folder.
 English (`en.txt`) is the reference pack and the default language.
 
 ## Format
@@ -24,7 +24,7 @@ The file name is the language code: `vi.txt`, `zh.txt`, `th.txt`, ...
    at build time by `build.sh`.
 2. **App folder** — `Android/data/com.lakasa.n1launcher/files/lang/*.txt`
    on the device (no permission needed).
-3. **Public folder** — `/sdcard/MTH-Launcher/lang/*.txt` (needs the storage
+3. **Public folder** — `/sdcard/Lak-Launcher/lang/*.txt` (needs the storage
    permission the launcher declares; the language kit grants it).
 
 A pack in a later source overrides single keys of the same language in an
@@ -34,8 +34,8 @@ earlier one, and a missing key falls back to English — partial packs work.
 
 ```sh
 adb connect <projector-ip>:5555
-adb shell mkdir -p /sdcard/MTH-Launcher/lang
-adb push th.txt /sdcard/MTH-Launcher/lang/
+adb shell mkdir -p /sdcard/Lak-Launcher/lang
+adb push th.txt /sdcard/Lak-Launcher/lang/
 adb shell pm grant com.lakasa.n1launcher android.permission.READ_EXTERNAL_STORAGE
 adb shell am force-stop com.lakasa.n1launcher
 ```

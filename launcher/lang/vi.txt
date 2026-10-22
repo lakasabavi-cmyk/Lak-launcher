@@ -1,4 +1,4 @@
-# MTH Launcher - Vietnamese language pack / Gói ngôn ngữ Tiếng Việt
+# Lak Launcher - Vietnamese language pack / Gói ngôn ngữ Tiếng Việt
 # Format: key=value, one per line. Lines starting with # are comments.
 __name=Tiếng Việt
 __locale=vi-VN
@@ -36,5 +36,5 @@ couldNotOpen=Không mở được
 notAvailable=Không có trên máy này
 notInstalled=Chưa cài:
 noStockHome=Không tìm thấy màn hình chính gốc. Nếu launcher này tự mở lại, nó đang là mặc định - đổi trong Cài đặt máy chiếu > Ứng dụng.
-onlyEnglish=Hiện chỉ có tiếng Anh. Thêm gói ngôn ngữ: đẩy file .txt vào /sdcard/MTH-Launcher/lang/ bằng ADB (xem tài liệu).
+onlyEnglish=Hiện chỉ có tiếng Anh. Thêm gói ngôn ngữ: đẩy file .txt vào /sdcard/Lak-Launcher/lang/ bằng ADB (xem tài liệu).
 builtWith=Vibe code bằng Meta Muse Spark

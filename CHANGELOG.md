@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.6 — 2026-10-23 (renamed to Lak Launcher)
+
+- **Project renamed to Lak Launcher** (repository: `Lak-launcher`). The app's
+  display name, the APK file name (`Lak-Launcher-v2.6.apk`), the install kit
+  and every document now use the new name — no trace of the old name remains
+  in the source.
+- Because the name changed, user-installed language packs now load from
+  `/sdcard/Lak-Launcher/lang/` (renamed from the v2.5 folder). If you added a
+  pack under v2.5, push it once more with kit `5-ADD-LANGUAGE.bat`.
+- Same signing key as v2.4/v2.5, so it installs over them; the saved app
+  order and language choice carry over.
+
 ## v2.5 — 2026-10-23 (first public source release)
 
 - **Language packs.** All UI strings moved out of the code into plain-text
@@ -7,7 +19,7 @@
   fallback for missing keys.
 - Packs are baked into the APK at build time from `launcher/lang/`, and the
   launcher additionally loads packs at runtime from
-  `/sdcard/MTH-Launcher/lang/` and its app-data `files/lang/` folder — so a
+  `/sdcard/Lak-Launcher/lang/` and its app-data `files/lang/` folder — so a
   language can be added to an installed launcher with one ADB push, no update.
 - The Language menu entry now cycles through every installed pack instead of
   toggling English/Vietnamese; the v2.4 toggle setting migrates automatically.

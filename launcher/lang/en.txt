@@ -1,4 +1,4 @@
-# MTH Launcher - English language pack (reference language)
+# Lak Launcher - English language pack (reference language)
 # Format: key=value, one per line. Lines starting with # are comments.
 # __name   = name shown in the Language menu
 # __locale = locale used for the date line (language-REGION)
@@ -38,5 +38,5 @@ couldNotOpen=Could not open
 notAvailable=Not available on this device
 notInstalled=Not installed:
 noStockHome=No stock home found. If this launcher reopens, it is set as default - change it in Projector Settings > Apps.
-onlyEnglish=Only English is installed. Add a language pack: push a .txt file to /sdcard/MTH-Launcher/lang/ with ADB (see the docs).
+onlyEnglish=Only English is installed. Add a language pack: push a .txt file to /sdcard/Lak-Launcher/lang/ with ADB (see the docs).
 builtWith=Vibe-coded with Meta Muse Spark

@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Tiny file-based i18n for MTH Launcher.
+ * Tiny file-based i18n for Lak Launcher.
  *
  * Languages are plain UTF-8 text files, one per language, named by code:
  * "en.txt", "vi.txt", "zh.txt", ... Each line is key=value. Lines starting
@@ -28,7 +28,7 @@ import java.util.Map;
  * Sources, in increasing priority (later sources override earlier ones):
  *   1. APK assets:  assets/lang/*.txt        (baked in at build time)
  *   2. App folder:  Android/data/com.lakasa.n1launcher/files/lang/*.txt
- *   3. Public folder: /sdcard/MTH-Launcher/lang/*.txt
+ *   3. Public folder: /sdcard/Lak-Launcher/lang/*.txt
  *
  * Sources 2 and 3 are what make languages user-installable: push any .txt
  * pack with ADB (or copy it with a file manager) and the launcher picks it
@@ -70,7 +70,7 @@ public class Lang {
         } catch (Exception ignored) { }
         // 3) public folder users can reach with any file manager / ADB
         try {
-            File pub = new File(Environment.getExternalStorageDirectory(), "MTH-Launcher/lang");
+            File pub = new File(Environment.getExternalStorageDirectory(), "Lak-Launcher/lang");
             lang.loadDir(pub);
         } catch (Exception ignored) { }
         // English must always exist, even if every file went missing.

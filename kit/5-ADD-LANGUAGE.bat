@@ -1,5 +1,5 @@
 @echo off
-title MTH Kit - 5. Add a language pack
+title Lak Kit - 5. Add a language pack
 cd /d %~dp0
 set IP=
 if exist ip.txt set /p IP=<ip.txt
@@ -18,11 +18,11 @@ echo  lang-drop folder to the projector. The launcher picks
 echo  new languages up on its next start - no reinstall.
 echo ============================================================
 echo.
-adb shell mkdir -p /sdcard/MTH-Launcher/lang
+adb shell mkdir -p /sdcard/Lak-Launcher/lang
 set FOUND=
 for %%F in (lang-drop\*.txt) do (
   echo Pushing %%~nxF ...
-  adb push "%%F" /sdcard/MTH-Launcher/lang/
+  adb push "%%F" /sdcard/Lak-Launcher/lang/
   set FOUND=1
 )
 if not defined FOUND (

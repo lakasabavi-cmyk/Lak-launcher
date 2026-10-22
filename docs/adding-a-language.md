@@ -1,6 +1,6 @@
 # Adding a language
 
-MTH Launcher's UI text is not in the code — it is in plain-text packs, so
+Lak Launcher's UI text is not in the code — it is in plain-text packs, so
 translating the launcher is a text-file job, not a programming job.
 
 ## Make a pack
@@ -17,8 +17,8 @@ translating the launcher is a text-file job, not a programming job.
 
 ```sh
 adb connect <projector-ip>:5555
-adb shell mkdir -p /sdcard/MTH-Launcher/lang
-adb push <your-file>.txt /sdcard/MTH-Launcher/lang/
+adb shell mkdir -p /sdcard/Lak-Launcher/lang
+adb push <your-file>.txt /sdcard/Lak-Launcher/lang/
 adb shell pm grant com.lakasa.n1launcher android.permission.READ_EXTERNAL_STORAGE
 adb shell am force-stop com.lakasa.n1launcher
 ```

@@ -12,7 +12,7 @@ support.
 - **Nothing is uninstalled.** Packages are only ever *disabled for user 0*
   (`pm disable-user --user 0`). The package stays on the device and can be
   re-enabled at any time — the restore kit does exactly that.
-- **No other apps are bundled.** The kits install only the MTH Launcher APK
+- **No other apps are bundled.** The kits install only the Lak Launcher APK
   from the same release. If a guide tells you to install SmartTube or another
   app, it links the official source and lets you decide.
 
@@ -23,12 +23,12 @@ Home after every reboot, and the ROM refuses to disable just its Home
 component (`pm disable-user` on the component throws a SecurityException).
 So the kit works in stages:
 
-1. **Step 1** disables only the stock Home *component* and sets MTH as the
-   default. On firmware that accepts it, this is all you need.
+1. **Step 1** disables only the stock Home *component* and sets Lak Launcher
+   as the default. On firmware that accepts it, this is all you need.
 2. **Step 2** (only if step 1 does not survive a reboot) disables the whole
    `com.jmgo.launcher` package for user 0.
 
-Before either step, the kit opens MTH on screen and asks you to confirm it
+Before either step, the kit opens Lak on screen and asks you to confirm it
 is really showing — the projector is never left without a working home
 screen. **Restore** re-enables the stock launcher and sets it back as
 default.

@@ -18,7 +18,7 @@ On a Windows PC on the same network as the device:
 The result file contains: full build properties (model, firmware, build
 type — `user` vs `userdebug`, verified-boot state), SELinux mode, the
 complete package list with APK paths, the system and disabled package
-lists, the current Home owner, settings tables, and the installed MTH /
+lists, the current Home owner, settings tables, and the installed Lak /
 SmartTube versions if present.
 
 ## 2. Open an issue

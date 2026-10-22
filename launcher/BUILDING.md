@@ -1,4 +1,4 @@
-# Building MTH Launcher
+# Building Lak Launcher
 
 No Gradle, no Android Studio project — the build is one transparent shell
 script, the same style the project started with.
@@ -16,7 +16,7 @@ script, the same style the project started with.
 ```sh
 cd launcher
 ./build.sh
-# -> output/MTH-Launcher-v2.5.apk
+# -> output/Lak-Launcher-v2.6.apk
 ```
 
 What the script does, in order:

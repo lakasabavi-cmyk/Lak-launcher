@@ -20,7 +20,7 @@ The reference device this project started on.
 - Disabling only the stock Home **component** is refused by the ROM
   (`SecurityException`: shell cannot change component state).
 - Disabling the whole **`com.jmgo.launcher`** package for user 0 works:
-  MTH Launcher stays Home across reboots. The settings panel and HDMI
+  Lak Launcher stays Home across reboots. The settings panel and HDMI
   inputs are separate packages and keep working.
 - Restore: `pm enable com.jmgo.launcher` + set it back as Home
   (kit file `4-RESTORE-STOCK-HOME.bat`).

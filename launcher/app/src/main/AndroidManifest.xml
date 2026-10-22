@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lakasa.n1launcher"
-    android:versionCode="16"
-    android:versionName="2.5">
+    android:versionCode="17"
+    android:versionName="2.6">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -10,7 +10,7 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Lets the launcher read user-installed language packs from
-         /sdcard/MTH-Launcher/lang/ (see Lang.java). -->
+         /sdcard/Lak-Launcher/lang/ (see Lang.java). -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <uses-feature

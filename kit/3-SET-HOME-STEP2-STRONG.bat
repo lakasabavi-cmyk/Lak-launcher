@@ -1,5 +1,5 @@
 @echo off
-title MTH Kit - 3. Set MTH as Home (step 2, strong)
+title Lak Kit - 3. Set Lak as Home (step 2, strong)
 cd /d %~dp0
 set IP=
 if exist ip.txt set /p IP=<ip.txt
@@ -21,9 +21,9 @@ echo  HDMI inputs are separate packages and keep working.
 echo  ADB can bring everything back with 4-RESTORE-STOCK-HOME.bat.
 echo ============================================================
 echo.
-echo 1/3: Opening MTH + setting it as default again...
+echo 1/3: Opening Lak + setting it as default again...
 adb shell am start -n com.lakasa.n1launcher/.MainActivity
-set /p OK=Is MTH Launcher showing on the projector? (y/n):
+set /p OK=Is Lak Launcher showing on the projector? (y/n):
 if /i not "%OK%"=="y" (
   echo Stopped - nothing was changed.
   pause
@@ -41,5 +41,5 @@ echo.
 set /p RB=Reboot the projector now to verify? (y/n):
 if /i "%RB%"=="y" adb reboot
 echo.
-echo After the reboot the projector must boot straight into MTH.
+echo After the reboot the projector must boot straight into Lak.
 pause

@@ -1,5 +1,5 @@
 @echo off
-title MTH Kit - Probe (read-only device report)
+title Lak Kit - Probe (read-only device report)
 cd /d %~dp0
 set IP=
 if exist ip.txt set /p IP=<ip.txt
@@ -19,7 +19,7 @@ echo  ADB to normal (adb unroot) before finishing.
 echo  Output: PROBE-RESULT.txt + probe-screen.png in this folder.
 echo ============================================================
 set OUT=PROBE-RESULT.txt
-echo MTH PROBE REPORT> %OUT%
+echo LAK PROBE REPORT> %OUT%
 echo Date: %DATE% %TIME%>> %OUT%
 echo Projector IP: %IP%>> %OUT%
 echo.>> %OUT%
@@ -72,7 +72,7 @@ echo.>> %OUT%
 echo ===== 12. BRAND / PLATFORM PACKAGES =====>> %OUT%
 adb shell pm list packages | findstr /i "jmgo bonfire mediatek">> %OUT% 2>&1
 echo.>> %OUT%
-echo ===== 13. MTH LAUNCHER + SMARTTUBE VERSIONS =====>> %OUT%
+echo ===== 13. LAK LAUNCHER + SMARTTUBE VERSIONS =====>> %OUT%
 adb shell dumpsys package com.lakasa.n1launcher | findstr /i "versionName versionCode">> %OUT% 2>&1
 adb shell dumpsys package org.smarttube.stable | findstr /i "versionName versionCode">> %OUT% 2>&1
 adb shell dumpsys package org.smarttube.beta | findstr /i "versionName versionCode">> %OUT% 2>&1

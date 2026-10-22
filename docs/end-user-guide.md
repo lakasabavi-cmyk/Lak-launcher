@@ -1,7 +1,7 @@
 # End-user guide — no programming needed
 
 This guide replaces the Chinese-only Bonfire OS home screen of a JMGO N1
-(China domestic model) with MTH Launcher, using a Windows PC and
+(China domestic model) with Lak Launcher, using a Windows PC and
 double-click files. Nothing is rooted, flashed or uninstalled, and a
 restore file puts everything back.
 
@@ -10,7 +10,7 @@ restore file puts everything back.
 - A Windows PC connected to the **same Wi-Fi** as the projector.
 - The projector switched on and showing its normal home screen.
 - The release `.zip` from this repository's **Releases** page, unzipped.
-  It contains `adb.exe`, the launcher APK (`MTH-Launcher.apk`), and the
+  It contains `adb.exe`, the launcher APK (`Lak-Launcher.apk`), and the
   numbered kit files (`.bat`).
 
 ## Step 0 — Find the projector's IP address
@@ -28,10 +28,10 @@ Easiest ways, pick one:
 
 ## Step 1 — Install the launcher
 
-Double-click **`1-INSTALL-MTH.bat`**, type the IP, press Enter.
+Double-click **`1-INSTALL-LAK.bat`**, type the IP, press Enter.
 
 - You should see `Success` — that means the app is installed.
-- The kit offers to open MTH Launcher on the projector right away. Say `y`
+- The kit offers to open Lak Launcher on the projector right away. Say `y`
   and look at the projector: you should see the new home screen (it is not
   the default yet — that is the next step).
 
@@ -39,13 +39,13 @@ Double-click **`1-INSTALL-MTH.bat`**, type the IP, press Enter.
 > **More info → Run anyway**. These are plain batch files — you can open
 > any of them in Notepad and read every command before running it.
 
-## Step 2 — Make MTH the default home
+## Step 2 — Make Lak Launcher the default home
 
 Double-click **`2-SET-HOME-STEP1.bat`** and follow the questions. It opens
-MTH first and asks you to confirm it is on screen before changing anything,
+Lak first and asks you to confirm it is on screen before changing anything,
 then sets it as default and reboots the projector if you agree.
 
-- After the reboot, if the projector starts into **MTH Launcher** and stays
+- After the reboot, if the projector starts into **Lak Launcher** and stays
   there: done. 🎉
 - If it starts into the old **Bonfire** home again: your firmware re-asserts
   the stock launcher (the reference unit does this). Run
@@ -68,7 +68,7 @@ language:
 ## Going back to stock
 
 Double-click **`4-RESTORE-STOCK-HOME.bat`** and reboot. The stock Bonfire
-launcher is re-enabled and set as default again, exactly as before. MTH
+launcher is re-enabled and set as default again, exactly as before. Lak
 Launcher stays installed but unused; you can uninstall it like any app, or
 keep it and switch back any time by re-running step 2.
 

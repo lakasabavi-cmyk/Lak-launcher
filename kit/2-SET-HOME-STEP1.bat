@@ -1,5 +1,5 @@
 @echo off
-title MTH Kit - 2. Set MTH as Home (step 1, gentle)
+title Lak Kit - 2. Set Lak as Home (step 1, gentle)
 cd /d %~dp0
 set IP=
 if exist ip.txt set /p IP=<ip.txt
@@ -14,21 +14,21 @@ adb connect %IP%:5555
 
 echo ============================================================
 echo  STEP 2 (gentle): disable only the stock Home screen
-echo  component and set MTH Launcher as the default Home.
+echo  component and set Lak Launcher as the default Home.
 echo  Nothing is uninstalled. Undo any time with
 echo  4-RESTORE-STOCK-HOME.bat.
 echo ============================================================
 echo.
-echo 1/4: Opening MTH Launcher remotely...
+echo 1/4: Opening Lak Launcher remotely...
 adb shell am start -n com.lakasa.n1launcher/.MainActivity
-set /p OK=Is MTH Launcher showing on the projector? (y/n):
+set /p OK=Is Lak Launcher showing on the projector? (y/n):
 if /i not "%OK%"=="y" (
-  echo Stopped - nothing was changed. Make sure MTH opens first.
+  echo Stopped - nothing was changed. Make sure Lak opens first.
   pause
   exit /b
 )
 echo.
-echo 2/4: Setting MTH as the default Home...
+echo 2/4: Setting Lak as the default Home...
 adb shell cmd package set-home-activity com.lakasa.n1launcher/.MainActivity
 adb shell pm set-home-activity com.lakasa.n1launcher/.MainActivity
 echo.
@@ -45,6 +45,6 @@ set /p RB=Reboot the projector now to verify? (y/n):
 if /i "%RB%"=="y" adb reboot
 echo.
 echo AFTER THE REBOOT:
-echo - Boots into MTH and stays there = DONE.
+echo - Boots into Lak and stays there = DONE.
 echo - Boots into Bonfire again = run 3-SET-HOME-STEP2-STRONG.bat
 pause

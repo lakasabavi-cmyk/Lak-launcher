@@ -1,10 +1,10 @@
-# MTH Launcher
+# Lak Launcher
 
 **A multilingual replacement launcher for China-domestic JMGO N1 projectors (Bonfire OS) — installed over ADB, no root, with double-click kits for non-technical users.**
 
 > 🤖 **Vibe-coded with Meta Muse Spark.** This project was designed, written and iterated with an AI coding agent (Muse Spark by Meta) working side by side with the device owner, testing on real hardware. The code is open — read it, audit it, improve it.
 
-China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English settings, a home screen full of local content services, and no Google apps. MTH Launcher replaces that home screen with a clean, TV-style launcher in **your** language — starting with English.
+China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English settings, a home screen full of local content services, and no Google apps. Lak Launcher replaces that home screen with a clean, TV-style launcher in **your** language — starting with English.
 
 ![status](https://img.shields.io/badge/device-JMGO%20N1%20(China%20domestic)-blue) ![os](https://img.shields.io/badge/OS-Bonfire%20OS%20%2F%20Android-green) ![root](https://img.shields.io/badge/root-not%20required-brightgreen) ![license](https://img.shields.io/badge/license-MIT-blue)
 
@@ -31,7 +31,7 @@ China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English 
 | Part | Status |
 |---|---|
 | Launcher as default Home on a real China-domestic JMGO N1 | ✅ Verified on the maintainer's unit (running since 2026-10-22) |
-| v2.5 language-pack system (this code) | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
+| v2.6 (this code): language packs + the Lak rename | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
 | Debloat lists for Bonfire OS | 🚧 Candidates collected in `data/jmgo-n1-bonfire/`, being verified from probe reports |
 | Other models (N1 Pro / N1 Ultra, other brands) | 📋 Planned — submit a probe report, see [Supporting a new device](docs/new-device-support.md) |
 
@@ -52,7 +52,7 @@ Requirements: JDK 17 and the Android SDK (platform 31, build-tools 34). No Gradl
 
 ```sh
 cd launcher
-./build.sh   # produces output/MTH-Launcher-v2.5.apk
+./build.sh   # produces output/Lak-Launcher-v2.6.apk
 ```
 
 See [launcher/BUILDING.md](launcher/BUILDING.md) for signing notes.
