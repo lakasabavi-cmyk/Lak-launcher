@@ -1,0 +1,23 @@
+# Debloat CANDIDATES for JMGO N1 / Bonfire OS
+# STATUS: UNVERIFIED on the N1 domestic. These names come from the two JMGO
+# field reports in the cleanyourtv project (N1S international, Google TV 14;
+# G9S China domestic, Android TV 9). Whether each package exists on Bonfire
+# OS, and whether the N1 survives a reboot without it, must be confirmed from
+# a probe report of the reference unit before anything here is applied.
+# Nothing in this file is applied by any kit yet.
+#
+# Telemetry
+com.jmgo.spider                 # JMGO tracker: boot receiver, location, app-usage stats (N1S report)
+# JMGO extras
+com.jmgo.helpcenter             # help centre; also runs a preinstall app-download service (N1S report)
+com.jmgo.overseas.atmosphere    # "Atmosphere" ambient scenes (N1S report; may not exist on the domestic build)
+# Retail demo
+fusion.android.tv.demo          # store demo loop (both reports; on G9S it registers TV_INPUT receivers - test the Input key with it off)
+# Media/browser extras (G9S report - disable only if the owner never uses them)
+com.jmgo.music                  # JMGO music backend
+com.jmgo.os.music               # JMGO music backend (OS layer)
+com.jmgo.player                 # JMGO local media player - USB/local playback stops without it
+com.jmgo.browser                # JMGO browser
+com.jmgo.imagebrowser4k         # JMGO image viewer
+# Test junk
+com.mstar.android.media.tests   # MStar media test program, not a user app (G9S report)

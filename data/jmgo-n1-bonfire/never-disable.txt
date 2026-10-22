@@ -1,0 +1,28 @@
+# NEVER DISABLE on JMGO projectors — these packages run the hardware.
+# Collected from the JMGO N1S and G9S field reports in cleanyourtv and kept
+# here as a hard guard: the kits in this repo refuse lists containing them.
+#
+# Optics / image
+com.jmgo.hippo                  # key handling, brightness, remote accessibility service
+com.jmgo.autofocus              # autofocus
+com.jmgo.tofautofocus          # ToF autofocus
+com.jmgo.autokeystone           # auto keystone
+com.jmgo.dewarping              # image dewarping
+com.jmgo.ptz                    # gimbal stand
+com.jmgo.autobrightness         # auto brightness
+# Remote / system glue
+com.jmgo.a2dpsinkservice        # Bluetooth speaker mode
+com.jmgo.android.tv.globalkeyoverlay
+com.jmgo.remotecontrolota       # remote firmware updates
+com.jmgo.factory                # factory package - never open, never disable
+# Platform vendors: TV inputs, input arbitration, hotkeys, audio
+com.mediatek.*                  # every MediaTek package
+com.dolby.*                     # every Dolby package (except a partner-row customizer if listed separately in a verified debloat file)
+# Android core - disabling any of these can stop the device booting
+android
+com.android.systemui
+com.android.shell
+com.android.settings
+com.android.tv.settings
+com.android.packageinstaller
+com.google.android.permissioncontroller

@@ -1,0 +1,21 @@
+# Signing keys must never be committed
+keystore.jks
+*.jks
+
+# Build outputs
+launcher/build/
+launcher/output/
+*.apk
+*.idsig
+
+# Generated at build time from launcher/lang/
+launcher/app/src/main/assets/
+
+# Local kit state and probe results
+ip.txt
+PROBE-RESULT*.txt
+probe-*.png
+
+# Muse GitHub snapshot sync records
+*.muse-github-snapshot-sync.json
+*.muse-github-snapshot-sync.json.tmp-*
