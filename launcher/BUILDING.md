@@ -16,7 +16,7 @@ script, the same style the project started with.
 ```sh
 cd launcher
 ./build.sh
-# -> output/Lak-Launcher-v2.6.apk
+# -> output/Lak-Launcher-v2.7.apk
 ```
 
 What the script does, in order:

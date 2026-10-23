@@ -67,6 +67,22 @@ public class MainActivity extends Activity {
     private LinearLayout editBar;
     private GridView grid;
     private AppAdapter adapter;
+
+    // Sections (v2.7): the right pane swaps content per rail selection.
+    private static final int SECTION_HOME = 0;
+    private static final int SECTION_APPS = 1;
+    private static final int SECTION_YOUTUBE = 2;
+    private static final int SECTION_SETTINGS = 3;
+    private int currentSection = SECTION_HOME;
+    private View homeView;
+    private View appsView;
+    private View youtubeView;
+    private View settingsView;
+    private LinearLayout homeAppsRow;
+    private View railHomeItem;
+    private View railAppsItem;
+    private View railYtItem;
+    private View railSettingsItem;
     private final Handler handler = new Handler();
     private final Runnable clockTick = new Runnable() {
         @Override public void run() {
@@ -185,25 +201,23 @@ public class MainActivity extends Activity {
         rail.setPadding(dp(8), dp(64), dp(8), dp(24));
         railScroll.addView(rail);
 
-        addRailItem(rail, "⊞", Color.parseColor("#E53935"), t("apps"), new View.OnClickListener() {
-            @Override public void onClick(View v) { focusApps(); }
+        railHomeItem = addRailItem(rail, "⌂", Color.parseColor("#455A64"), t("home"), SECTION_HOME, new View.OnClickListener() {
+            @Override public void onClick(View v) { showSection(SECTION_HOME, true); }
         });
-        addRailItem(rail, "▶", Color.parseColor("#FF0000"), "YouTube", new View.OnClickListener() {
-            @Override public void onClick(View v) { launchYouTubeApp(); }
+        railAppsItem = addRailItem(rail, "⊞", Color.parseColor("#E53935"), t("apps"), SECTION_APPS, new View.OnClickListener() {
+            @Override public void onClick(View v) { showSection(SECTION_APPS, true); }
         });
-        addRailItem(rail, "V", Color.parseColor("#EE0033"), "VTVgo TV", new View.OnClickListener() {
+        railYtItem = addRailItem(rail, "▶", Color.parseColor("#FF0000"), "YouTube", SECTION_YOUTUBE, new View.OnClickListener() {
+            @Override public void onClick(View v) { showSection(SECTION_YOUTUBE, true); }
+        });
+        addRailItem(rail, "V", Color.parseColor("#EE0033"), "VTVgo TV", -1, new View.OnClickListener() {
             @Override public void onClick(View v) { launchVtvgoApp(); }
         });
-        addRailItem(rail, "◐", Color.parseColor("#5F6368"), t("projSettings"), new View.OnClickListener() {
-            @Override public void onClick(View v) { openProjectorSettings(); }
+        railSettingsItem = addRailItem(rail, "⚙", Color.parseColor("#5F6368"), t("settings"), SECTION_SETTINGS, new View.OnClickListener() {
+            @Override public void onClick(View v) { showSection(SECTION_SETTINGS, true); }
         });
-        addRailItem(rail, "⚙", Color.parseColor("#5F6368"), t("sysSettings"), new View.OnClickListener() {
-            @Override public void onClick(View v) { openSystemSettings(); }
-        });
-        addRailItem(rail, "Aa", Color.parseColor("#1E88E5"), t("language"), new View.OnClickListener() {
-            @Override public void onClick(View v) { toggleLanguage(); }
-        });
-        addRailItem(rail, "↩", Color.parseColor("#5F6368"), t("exit"), new View.OnClickListener() {
+        // Door glyph for Exit, like a log-out door icon (Hung's request, v2.7).
+        addRailItem(rail, "🚪", Color.parseColor("#5F6368"), t("exit"), -1, new View.OnClickListener() {
             @Override public void onClick(View v) { exitToStockHome(); }
         });
 
@@ -255,38 +269,139 @@ public class MainActivity extends Activity {
         header.addView(clockBox);
         content.addView(header);
 
-        // Rearrange bar above the apps grid (visible in the Apps section)
+        // ============ SECTIONS (v2.7): right pane swaps per rail selection ============
+        FrameLayout sections = new FrameLayout(this);
+        LinearLayout.LayoutParams sectionsLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        sectionsLp.topMargin = dp(6);
+        content.addView(sections, sectionsLp);
+
+        homeView = buildHomeSection();
+        sections.addView(homeView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        appsView = buildAppsSection();
+        sections.addView(appsView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        youtubeView = buildYouTubeSection();
+        sections.addView(youtubeView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        settingsView = buildSettingsSection();
+        sections.addView(settingsView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(root);
+        showSection(currentSection, false);
+
+        // Start focused inside the visible section.
+        root.post(new Runnable() {
+            @Override public void run() { focusCurrentSection(); }
+        });
+    }
+
+    private void showSection(int section, boolean grabFocus) {
+        currentSection = section;
+        if (homeView != null) homeView.setVisibility(section == SECTION_HOME ? View.VISIBLE : View.GONE);
+        if (appsView != null) appsView.setVisibility(section == SECTION_APPS ? View.VISIBLE : View.GONE);
+        if (youtubeView != null) youtubeView.setVisibility(section == SECTION_YOUTUBE ? View.VISIBLE : View.GONE);
+        if (settingsView != null) settingsView.setVisibility(section == SECTION_SETTINGS ? View.VISIBLE : View.GONE);
+        refreshRailSelection();
+        if (grabFocus) focusCurrentSection();
+    }
+
+    private void focusCurrentSection() {
+        if (currentSection == SECTION_APPS) {
+            focusApps();
+            return;
+        }
+        View target = currentSection == SECTION_YOUTUBE ? youtubeView
+                : currentSection == SECTION_SETTINGS ? settingsView : homeView;
+        if (target != null) {
+            ArrayList<View> focusables = target.getFocusables(View.FOCUS_FORWARD);
+            if (!focusables.isEmpty()) focusables.get(0).requestFocus();
+        }
+    }
+
+    private void refreshRailSelection() {
+        View[] items = {railHomeItem, railAppsItem, railYtItem, railSettingsItem};
+        int[] secs = {SECTION_HOME, SECTION_APPS, SECTION_YOUTUBE, SECTION_SETTINGS};
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] == null) continue;
+            if (secs[i] == currentSection) {
+                GradientDrawable selBg = new GradientDrawable();
+                selBg.setColor(COL_CARD);
+                selBg.setCornerRadius(dp(14));
+                items[i].setBackground(selBg);
+            } else {
+                items[i].setBackground(null);
+            }
+        }
+    }
+
+    // Home: apps as ONE horizontally scrolling row + the two YouTube card
+    // rows (also horizontal). No rearrange button here (Hung, v2.7).
+    private View buildHomeSection() {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setFocusable(false);
+        LinearLayout lower = new LinearLayout(this);
+        lower.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(lower);
+
+        lower.addView(rowTitle(t("apps")));
+        HorizontalScrollView hsv = new HorizontalScrollView(this);
+        hsv.setHorizontalScrollBarEnabled(false);
+        hsv.setFocusable(false);
+        homeAppsRow = new LinearLayout(this);
+        homeAppsRow.setOrientation(LinearLayout.HORIZONTAL);
+        homeAppsRow.setPadding(dp(4), dp(8), dp(16), dp(10));
+        hsv.addView(homeAppsRow);
+        lower.addView(hsv);
+
+        buildYouTubeRows(lower);
+        return scroll;
+    }
+
+    // Apps page: full grid of every installed app; the rearrange chip sits
+    // top-right, under the clock/date (Hung, v2.7).
+    private View buildAppsSection() {
+        LinearLayout wrap = new LinearLayout(this);
+        wrap.setOrientation(LinearLayout.VERTICAL);
+
         LinearLayout rearrangeRow = new LinearLayout(this);
         rearrangeRow.setOrientation(LinearLayout.HORIZONTAL);
         rearrangeRow.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout.LayoutParams rrLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        rrLp.topMargin = dp(14);
-        content.addView(rearrangeRow, rrLp);
+        rrLp.topMargin = dp(8);
+        wrap.addView(rearrangeRow, rrLp);
+        rearrangeRow.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1f));
         TextView rearrangeBtn = makeChip(t("rearrange"), new View.OnClickListener() {
             @Override public void onClick(View v) { setEditMode(!editMode); }
         });
         LinearLayout.LayoutParams chipLp = new LinearLayout.LayoutParams(dp(220), ViewGroup.LayoutParams.WRAP_CONTENT);
         rearrangeBtn.setLayoutParams(chipLp);
         rearrangeRow.addView(rearrangeBtn);
+
         hintView = new TextView(this);
         hintView.setText(t("editHint"));
         hintView.setTextColor(Color.parseColor("#FFC857"));
         hintView.setTextSize(13);
+        hintView.setGravity(Gravity.RIGHT);
         hintView.setVisibility(View.GONE);
-        LinearLayout.LayoutParams hintLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        hintLp.leftMargin = dp(14);
-        hintView.setLayoutParams(hintLp);
-        rearrangeRow.addView(hintView);
+        LinearLayout.LayoutParams hintLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        hintLp.topMargin = dp(8);
+        wrap.addView(hintView, hintLp);
 
         // Edit-mode bar (Done / Reset order), hidden unless rearranging
         editBar = new LinearLayout(this);
         editBar.setOrientation(LinearLayout.HORIZONTAL);
+        editBar.setGravity(Gravity.RIGHT);
         editBar.setVisibility(View.GONE);
         LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         barLp.topMargin = dp(8);
-        content.addView(editBar, barLp);
+        wrap.addView(editBar, barLp);
         TextView doneBtn = makeChip(t("done"), new View.OnClickListener() {
             @Override public void onClick(View v) { setEditMode(false); }
         });
@@ -304,20 +419,7 @@ public class MainActivity extends Activity {
         resetBtn.setLayoutParams(resetLp);
         editBar.addView(resetBtn);
 
-        // Scrollable lower area: apps grid + YouTube rows
-        ScrollView scroll = new ScrollView(this);
-        scroll.setVerticalScrollBarEnabled(false);
-        scroll.setFocusable(false);
-        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
-        scrollLp.topMargin = dp(6);
-        content.addView(scroll, scrollLp);
-
-        LinearLayout lower = new LinearLayout(this);
-        lower.setOrientation(LinearLayout.VERTICAL);
-        scroll.addView(lower);
-
-        // Apps grid: 8 columns, medium icons, internal scrolling for extra rows
+        // Apps grid: 8 columns, fills the rest of the page.
         grid = new GridView(this);
         grid.setNumColumns(8);
         grid.setHorizontalSpacing(dp(12));
@@ -327,8 +429,9 @@ public class MainActivity extends Activity {
         grid.setFocusable(true);
         grid.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         LinearLayout.LayoutParams gridLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(118));
-        lower.addView(grid, gridLp);
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        gridLp.topMargin = dp(10);
+        wrap.addView(grid, gridLp);
         grid.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (adapter != null) adapter.setSelected(position);
@@ -353,8 +456,23 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+        return wrap;
+    }
 
-        // YouTube rows: big cards, 4 per row
+    // YouTube page: SmartTube content only.
+    private View buildYouTubeSection() {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setFocusable(false);
+        LinearLayout lower = new LinearLayout(this);
+        lower.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(lower);
+        buildYouTubeRows(lower);
+        return scroll;
+    }
+
+    private void buildYouTubeRows(LinearLayout lower) {
+        // YouTube rows: big cards, 4 per row, horizontal scroll
         lower.addView(rowTitle(t("ytRow1")));
         HorizontalScrollView row1 = makeCardRow(lower);
         addBigCard(row1, "↺", t("ytHistory"), t("ytHistorySub"), 0xFF8E2A2A, 0xFF38090E,
@@ -376,13 +494,132 @@ public class MainActivity extends Activity {
                 "PlaylistsLauncherActivity");
         addBigCard(row2, "▶", t("ytOpen"), t("ytOpenSub"), 0xFF3A3A3E, 0xFF0A0A0C,
                 "HomeLauncherActivity");
+    }
 
-        setContentView(root);
-
-        // Start focused on the apps grid, like Android TV home.
-        root.post(new Runnable() {
-            @Override public void run() { focusApps(); }
+    // Settings page: the three former rail entries as submenu rows.
+    private View buildSettingsSection() {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setFocusable(false);
+        LinearLayout lower = new LinearLayout(this);
+        lower.setOrientation(LinearLayout.VERTICAL);
+        lower.setPadding(dp(4), dp(10), dp(4), 0);
+        scroll.addView(lower);
+        addSettingsRow(lower, "◐", t("projSettings"), null, new View.OnClickListener() {
+            @Override public void onClick(View v) { openProjectorSettings(); }
         });
+        addSettingsRow(lower, "⚙", t("sysSettings"), null, new View.OnClickListener() {
+            @Override public void onClick(View v) { openSystemSettings(); }
+        });
+        addSettingsRow(lower, "Aa", t("language"),
+                lang != null ? lang.nameOf(lang.currentCode()) : null, new View.OnClickListener() {
+            @Override public void onClick(View v) { toggleLanguage(); }
+        });
+        TextView hint = new TextView(this);
+        hint.setText(t("settingsHint"));
+        hint.setTextColor(Color.parseColor("#FFC857"));
+        hint.setTextSize(13);
+        LinearLayout.LayoutParams hintLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        hintLp.topMargin = dp(18);
+        hint.setLayoutParams(hintLp);
+        lower.addView(hint);
+        return scroll;
+    }
+
+    private void addSettingsRow(LinearLayout parent, String glyph, String title, String sub,
+                                View.OnClickListener click) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setFocusable(true);
+        row.setFocusableInTouchMode(false);
+        row.setClickable(true);
+        row.setPadding(dp(18), dp(16), dp(18), dp(16));
+        row.setBackground(cardBg(false));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(12);
+        row.setLayoutParams(lp);
+        TextView g = new TextView(this);
+        g.setText(glyph);
+        g.setTextColor(Color.WHITE);
+        g.setTextSize(22);
+        g.setGravity(Gravity.CENTER);
+        g.setLayoutParams(new LinearLayout.LayoutParams(dp(44), dp(44)));
+        row.addView(g);
+        LinearLayout texts = new LinearLayout(this);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        tLp.leftMargin = dp(10);
+        texts.setLayoutParams(tLp);
+        TextView titleTv = new TextView(this);
+        titleTv.setText(title);
+        titleTv.setTextColor(COL_TEXT);
+        titleTv.setTextSize(17);
+        texts.addView(titleTv);
+        if (sub != null && sub.length() > 0) {
+            TextView subTv = new TextView(this);
+            subTv.setText(sub);
+            subTv.setTextColor(COL_TEXT_DIM);
+            subTv.setTextSize(13);
+            texts.addView(subTv);
+        }
+        row.addView(texts);
+        row.setOnClickListener(click);
+        row.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override public void onFocusChange(View v, boolean f) {
+                v.setBackground(cardBg(f));
+            }
+        });
+        parent.addView(row);
+    }
+
+    // Mirrors the Apps-page grid into Home's horizontal apps row.
+    private void rebuildHomeAppsRow() {
+        if (homeAppsRow == null || adapter == null) return;
+        homeAppsRow.removeAllViews();
+        for (int i = 0; i < adapter.getCount(); i++) {
+            final AppItem it = adapter.getItem(i);
+            LinearLayout cell = new LinearLayout(this);
+            cell.setOrientation(LinearLayout.VERTICAL);
+            cell.setGravity(Gravity.CENTER);
+            cell.setPadding(dp(6), dp(10), dp(6), dp(8));
+            cell.setFocusable(true);
+            cell.setFocusableInTouchMode(false);
+            cell.setClickable(true);
+            LinearLayout.LayoutParams cellLp = new LinearLayout.LayoutParams(dp(96), ViewGroup.LayoutParams.WRAP_CONTENT);
+            cellLp.setMargins(0, 0, dp(8), 0);
+            cell.setLayoutParams(cellLp);
+            ImageView icon = new ImageView(this);
+            icon.setLayoutParams(new LinearLayout.LayoutParams(dp(52), dp(52)));
+            if (it.icon != null) icon.setImageDrawable(it.icon);
+            cell.addView(icon);
+            final TextView label = new TextView(this);
+            label.setText(it.label);
+            label.setTextSize(12);
+            label.setGravity(Gravity.CENTER);
+            label.setMaxLines(1);
+            label.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            label.setTextColor(COL_TEXT_DIM);
+            LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            llp.topMargin = dp(6);
+            label.setLayoutParams(llp);
+            cell.addView(label);
+            cell.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) { launch(it); }
+            });
+            cell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override public void onFocusChange(View v, boolean f) {
+                    v.setBackground(cardBg(f));
+                    label.setTextColor(f ? Color.WHITE : COL_TEXT_DIM);
+                    v.setScaleX(f ? 1.05f : 1f);
+                    v.setScaleY(f ? 1.05f : 1f);
+                }
+            });
+            homeAppsRow.addView(cell);
+        }
     }
 
     private TextView rowTitle(String text) {
@@ -511,8 +748,8 @@ public class MainActivity extends Activity {
         return b;
     }
 
-    private void addRailItem(LinearLayout rail, String glyph, int circleColor,
-                             String labelText, View.OnClickListener click) {
+    private View addRailItem(LinearLayout rail, String glyph, int circleColor,
+                             String labelText, int section, View.OnClickListener click) {
         final int railCircleColor = circleColor;
         final boolean whiteCircle = circleColor == Color.WHITE;
         LinearLayout item = new LinearLayout(this);
@@ -526,6 +763,7 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         itemLp.bottomMargin = dp(6);
         item.setLayoutParams(itemLp);
+        item.setTag(section);
 
         FrameLayout circleWrap = new FrameLayout(this);
         circleWrap.setLayoutParams(new LinearLayout.LayoutParams(dp(52), dp(52)));
@@ -563,12 +801,15 @@ public class MainActivity extends Activity {
                 circle.setScaleY(f ? 1.14f : 1f);
                 glyphTv.setScaleX(f ? 1.14f : 1f);
                 glyphTv.setScaleY(f ? 1.14f : 1f);
-                label.setTextColor(f ? Color.WHITE : COL_TEXT_DIM);
-                label.setTypeface(f ? android.graphics.Typeface.DEFAULT_BOLD
+                boolean sel = v.getTag() instanceof Integer
+                        && (Integer) v.getTag() == currentSection;
+                label.setTextColor(f || sel ? Color.WHITE : COL_TEXT_DIM);
+                label.setTypeface(f || sel ? android.graphics.Typeface.DEFAULT_BOLD
                         : android.graphics.Typeface.DEFAULT);
             }
         });
         rail.addView(item);
+        return item;
     }
 
     private void focusApps() {
@@ -692,6 +933,7 @@ public class MainActivity extends Activity {
 
         adapter = new AppAdapter(items);
         grid.setAdapter(adapter);
+        rebuildHomeAppsRow();
     }
 
     private void launch(AppItem item) {

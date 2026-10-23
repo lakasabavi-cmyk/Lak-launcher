@@ -6,6 +6,8 @@ __name=English
 __locale=en-US
 
 apps=Apps
+home=Home
+settings=Settings
 projSettings=Projector Settings
 sysSettings=System Settings
 language=Language

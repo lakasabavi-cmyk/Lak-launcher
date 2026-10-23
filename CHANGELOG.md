@@ -1,5 +1,26 @@
 # Changelog
 
+## v2.7 — 2026-10-23 (section-based navigation)
+
+- **The rail is now a real navigation menu.** It has six entries — Home,
+  Apps, YouTube, VTVgo TV, Settings, Exit — and selecting Home / Apps /
+  YouTube / Settings swaps the entire right pane to that section (VTVgo TV
+  and Exit stay direct actions). The active section is highlighted.
+- **Home page** is rows only, all horizontally scrolling: an apps row,
+  the SmartTube "History & Library" cards and the "Explore" cards. The
+  Rearrange button no longer sits on Home.
+- **Apps page** shows every installed app in the full 8-column grid;
+  Rearrange Apps moved here, top-right under the clock and date
+  (long-press OK on an app still enters rearrange mode too).
+- **YouTube page** shows only SmartTube content (the two card rows).
+- **Settings page** groups the three former rail entries as submenus:
+  Projector Settings, System Settings and Language (showing the current
+  language), plus the remote long-press hint.
+- Exit uses a door (log-out style) icon, as requested by the maintainer.
+- New language keys `home` and `settings` in both packs.
+- Same signing key as v2.4–v2.6, so it installs over them; app order and
+  language choice carry over.
+
 ## v2.6 — 2026-10-23 (renamed to Lak Launcher)
 
 - **Project renamed to Lak Launcher** (repository: `Lak-launcher`). The app's

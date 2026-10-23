@@ -4,6 +4,8 @@ __name=Tiếng Việt
 __locale=vi-VN
 
 apps=App
+home=Trang chủ
+settings=Cài đặt
 projSettings=Cài đặt máy chiếu
 sysSettings=Cài đặt hệ thống
 language=Ngôn ngữ
