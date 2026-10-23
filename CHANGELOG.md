@@ -1,5 +1,25 @@
 # Changelog
 
+## v2.8 — 2026-10-23 (real video rows from TV channels)
+
+- **The launcher now reads Android TV channels** (`content://android.media.tv`)
+  — the standard mechanism Google TV's home uses. Every channel an app
+  publishes becomes a poster row of real videos on the **Home** page and on
+  the **YouTube** page; tapping a tile opens that exact video through the
+  program's stored intent URI. A **Watch Next** row appears when the system
+  has watch-next data. Data refreshes whenever you return to the launcher.
+- This is the route to the maintainer's actual request — SmartTube's real
+  history and suggested videos as tiles on the home screen. Whether any
+  rows appear depends on SmartTube publishing channels on this ROM: the
+  projector's TV provider exists (verified on-device 2026-10-23), but its
+  tables were empty when probed over ADB — and the ADB shell may simply
+  lack read access, so the launcher itself is now the probe: when nothing
+  is shared, the YouTube page shows a status line with the exact counts it
+  could read (channels / videos / watch-next, plus any read error).
+- Added the `INTERNET` permission (poster images may be remote URLs) and
+  the `watchNext` / `noChannelData` language keys.
+- Same signing key as v2.4–v2.7; installs over them, settings carry over.
+
 ## v2.7 — 2026-10-23 (section-based navigation)
 
 - **The rail is now a real navigation menu.** It has six entries — Home,

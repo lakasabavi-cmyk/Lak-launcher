@@ -17,6 +17,7 @@ China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English 
 ## Features
 
 - **English-first UI**, Android TV-style layout: a left rail switches the whole right pane between **Home** (horizontal-scrolling rows: apps, SmartTube history & library, explore), **Apps** (the full 8-column grid of every installed app, with rearrange mode), **YouTube** (SmartTube content only) and **Settings** (projector settings, system settings and language as one submenu page) — plus direct VTVgo TV and Exit entries.
+- **Real video rows:** the launcher reads the Android TV channel store, so videos an app publishes (for example SmartTube) appear as poster tiles on Home and on the YouTube page — tap one and that exact video opens.
 - **File-based language packs.** UI text lives in plain `key=value` `.txt` files — no Android string resources, no rebuild needed to add a language:
   - Builders: drop a new `xx.txt` into `launcher/lang/` and rebuild; it is baked into the APK automatically.
   - End users: push a `.txt` pack to the projector with ADB and the launcher picks it up on next start (see [Adding a language](docs/adding-a-language.md)).
@@ -31,7 +32,7 @@ China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English 
 | Part | Status |
 |---|---|
 | Launcher as default Home on a real China-domestic JMGO N1 | ✅ Verified on the maintainer's unit (running since 2026-10-22) |
-| v2.7 (this code): section-based navigation | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
+| v2.8 (this code): TV channel video rows | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
 | Debloat lists for Bonfire OS | 🚧 Candidates collected in `data/jmgo-n1-bonfire/`, being verified from probe reports |
 | Other models (N1 Pro / N1 Ultra, other brands) | 📋 Planned — submit a probe report, see [Supporting a new device](docs/new-device-support.md) |
 
@@ -52,7 +53,7 @@ Requirements: JDK 17 and the Android SDK (platform 31, build-tools 34). No Gradl
 
 ```sh
 cd launcher
-./build.sh   # produces output/Lak-Launcher-v2.7.apk
+./build.sh   # produces output/Lak-Launcher-v2.8.apk
 ```
 
 See [launcher/BUILDING.md](launcher/BUILDING.md) for signing notes.

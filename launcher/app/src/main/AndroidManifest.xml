@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lakasa.n1launcher"
-    android:versionCode="18"
-    android:versionName="2.7">
+    android:versionCode="19"
+    android:versionName="2.8">
 
     <uses-sdk
         android:minSdkVersion="23"
         android:targetSdkVersion="28" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Lets the launcher read user-installed language packs from
          /sdcard/Lak-Launcher/lang/ (see Lang.java). -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

@@ -2,10 +2,14 @@ package com.lakasa.n1launcher;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -28,6 +32,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,6 +88,8 @@ public class MainActivity extends Activity {
     private View railAppsItem;
     private View railYtItem;
     private View railSettingsItem;
+    private LinearLayout homeVideoBox;
+    private LinearLayout ytVideoBox;
     private final Handler handler = new Handler();
     private final Runnable clockTick = new Runnable() {
         @Override public void run() {
@@ -115,6 +122,7 @@ public class MainActivity extends Activity {
         lang.setCurrent(langCode);
         buildUi();
         loadApps();
+        loadTvDataAsync();
         handler.post(clockTick);
     }
 
@@ -122,6 +130,13 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(clockTick);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Coming back from SmartTube may have produced new channel data.
+        if (tvLoadedOnce) loadTvDataAsync();
     }
 
     @Override
@@ -357,6 +372,11 @@ public class MainActivity extends Activity {
         hsv.addView(homeAppsRow);
         lower.addView(hsv);
 
+        // Real video rows published through the TV provider land here.
+        homeVideoBox = new LinearLayout(this);
+        homeVideoBox.setOrientation(LinearLayout.VERTICAL);
+        lower.addView(homeVideoBox);
+
         buildYouTubeRows(lower);
         return scroll;
     }
@@ -467,6 +487,10 @@ public class MainActivity extends Activity {
         LinearLayout lower = new LinearLayout(this);
         lower.setOrientation(LinearLayout.VERTICAL);
         scroll.addView(lower);
+        // Real video rows (or the "nothing shared yet" status) go on top.
+        ytVideoBox = new LinearLayout(this);
+        ytVideoBox.setOrientation(LinearLayout.VERTICAL);
+        lower.addView(ytVideoBox);
         buildYouTubeRows(lower);
         return scroll;
     }
@@ -620,6 +644,277 @@ public class MainActivity extends Activity {
             });
             homeAppsRow.addView(cell);
         }
+    }
+
+    // ---------- TV channels: real video rows published by apps ----------
+    // Android TV apps (SmartTube included) can publish channels of real
+    // videos through the system TV provider (content://android.media.tv).
+    // A launcher is exactly the app meant to read them: every preview
+    // program carries a title, a poster and an intent URI that opens that
+    // exact video. Raw URI strings on purpose: the TvContract nested
+    // classes only exist on API 26+, the URIs themselves work everywhere.
+    private static final Uri TV_CHANNELS_URI = Uri.parse("content://android.media.tv/channel");
+    private static final Uri TV_PREVIEW_URI = Uri.parse("content://android.media.tv/preview_program");
+    private static final Uri TV_WATCHNEXT_URI = Uri.parse("content://android.media.tv/watch_next_program");
+
+    private static class TvProg {
+        long channelId;
+        String title;
+        String poster;
+        String intentUri;
+    }
+
+    private final List<String> tvChannelNames = new ArrayList<String>();
+    private final List<Long> tvChannelIds = new ArrayList<Long>();
+    private final List<TvProg> tvPrograms = new ArrayList<TvProg>();
+    private final List<TvProg> tvWatchNext = new ArrayList<TvProg>();
+    private final Map<String, Bitmap> posterCache =
+            new java.util.concurrent.ConcurrentHashMap<String, Bitmap>();
+    private String tvDiag = "";
+    private boolean tvLoading = false;
+    private boolean tvLoadedOnce = false;
+
+    private void loadTvDataAsync() {
+        if (tvLoading) return;
+        tvLoading = true;
+        new Thread(new Runnable() {
+            @Override public void run() {
+                queryTvData();
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        tvLoading = false;
+                        tvLoadedOnce = true;
+                        refreshVideoRows();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void queryTvData() {
+        tvChannelNames.clear();
+        tvChannelIds.clear();
+        tvPrograms.clear();
+        tvWatchNext.clear();
+        StringBuilder diag = new StringBuilder();
+        ContentResolver cr = getContentResolver();
+        Cursor c = null;
+        try {
+            c = cr.query(TV_CHANNELS_URI, null, null, null, null);
+            if (c != null) {
+                int idI = c.getColumnIndex("_id");
+                int nameI = c.getColumnIndex("display_name");
+                while (c.moveToNext()) {
+                    tvChannelIds.add(idI >= 0 ? c.getLong(idI) : -1L);
+                    tvChannelNames.add(nameI >= 0 ? c.getString(nameI) : "");
+                }
+            }
+        } catch (Exception e) {
+            diag.append("channels:").append(e.getClass().getSimpleName()).append(' ');
+        } finally {
+            if (c != null) c.close();
+        }
+        queryPrograms(cr, TV_PREVIEW_URI, tvPrograms, diag, "preview");
+        queryPrograms(cr, TV_WATCHNEXT_URI, tvWatchNext, diag, "watchnext");
+        tvDiag = diag.toString().trim();
+    }
+
+    private void queryPrograms(ContentResolver cr, Uri uri, List<TvProg> out,
+                               StringBuilder diag, String tag) {
+        Cursor c = null;
+        try {
+            c = cr.query(uri, null, null, null, null);
+            if (c != null) {
+                int chI = c.getColumnIndex("channel_id");
+                int tI = c.getColumnIndex("title");
+                int pI = c.getColumnIndex("poster_art_uri");
+                int iI = c.getColumnIndex("intent_uri");
+                while (c.moveToNext()) {
+                    TvProg p = new TvProg();
+                    p.channelId = chI >= 0 ? c.getLong(chI) : -1L;
+                    p.title = tI >= 0 ? c.getString(tI) : "";
+                    p.poster = pI >= 0 ? c.getString(pI) : null;
+                    p.intentUri = iI >= 0 ? c.getString(iI) : null;
+                    out.add(p);
+                }
+            }
+        } catch (Exception e) {
+            diag.append(tag).append(':').append(e.getClass().getSimpleName()).append(' ');
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    private void refreshVideoRows() {
+        fillVideoBox(homeVideoBox, false);
+        fillVideoBox(ytVideoBox, true);
+    }
+
+    private void fillVideoBox(LinearLayout box, boolean withStatus) {
+        if (box == null) return;
+        box.removeAllViews();
+        // One row per channel that actually has videos, in channel order.
+        for (int ci = 0; ci < tvChannelIds.size(); ci++) {
+            long cid = tvChannelIds.get(ci);
+            List<TvProg> progs = new ArrayList<TvProg>();
+            for (TvProg p : tvPrograms) if (p.channelId == cid) progs.add(p);
+            if (progs.isEmpty()) continue;
+            String name = tvChannelNames.get(ci);
+            addVideoRow(box, name != null && name.length() > 0 ? name : "SmartTube", progs);
+        }
+        List<TvProg> orphans = new ArrayList<TvProg>();
+        for (TvProg p : tvPrograms) if (!tvChannelIds.contains(p.channelId)) orphans.add(p);
+        if (!orphans.isEmpty()) addVideoRow(box, "SmartTube", orphans);
+        if (!tvWatchNext.isEmpty()) addVideoRow(box, t("watchNext"), tvWatchNext);
+        if (withStatus && tvPrograms.isEmpty() && tvWatchNext.isEmpty()) {
+            // Visible diagnostics: the counts say whether SmartTube has not
+            // published anything yet or the provider refused the read.
+            TextView st = new TextView(this);
+            String counts = " [channels " + tvChannelIds.size()
+                    + " / videos " + tvPrograms.size()
+                    + " / watch-next " + tvWatchNext.size()
+                    + (tvDiag.length() > 0 ? " / " + tvDiag : "") + "]";
+            st.setText(t("noChannelData") + counts);
+            st.setTextColor(COL_TEXT_DIM);
+            st.setTextSize(13);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = dp(16);
+            st.setLayoutParams(lp);
+            box.addView(st);
+        }
+    }
+
+    private void addVideoRow(LinearLayout parent, String title, List<TvProg> progs) {
+        parent.addView(rowTitle(title));
+        HorizontalScrollView hsv = makeCardRow(parent);
+        LinearLayout row = (LinearLayout) hsv.findViewWithTag("cardRowInner");
+        for (TvProg p : progs) addVideoTile(row, hsv, p);
+    }
+
+    private void addVideoTile(LinearLayout row, final HorizontalScrollView scroller,
+                              final TvProg prog) {
+        int screenDp = (int) (getResources().getDisplayMetrics().widthPixels
+                / getResources().getDisplayMetrics().density);
+        int contentDp = screenDp - 172 - 42 - 20; // rail + right padding + row paddings
+        int cardW = Math.max(150, (contentDp - 3 * 14) / 4);
+        int cardH = cardW * 9 / 16;
+
+        FrameLayout card = new FrameLayout(this);
+        card.setFocusable(true);
+        card.setFocusableInTouchMode(false);
+        card.setClickable(true);
+        GradientDrawable g = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0xFF2C2733, 0xFF17131F});
+        g.setCornerRadius(dp(8));
+        card.setBackground(g);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(cardW), dp(cardH));
+        lp.setMargins(0, 0, dp(14), 0);
+        card.setLayoutParams(lp);
+
+        final ImageView poster = new ImageView(this);
+        poster.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        card.addView(poster, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        loadPosterAsync(prog.poster, poster);
+
+        TextView titleTv = new TextView(this);
+        titleTv.setText(prog.title != null ? prog.title : "");
+        titleTv.setTextColor(Color.WHITE);
+        titleTv.setTextSize(13);
+        titleTv.setMaxLines(2);
+        titleTv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        titleTv.setShadowLayer(4, 0, 1, 0xCC000000);
+        titleTv.setPadding(dp(10), dp(14), dp(10), dp(8));
+        FrameLayout.LayoutParams tLp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tLp.gravity = Gravity.BOTTOM;
+        card.addView(titleTv, tLp);
+
+        // Focus border rides on top of the poster (a background stroke
+        // would be hidden underneath the image).
+        final View border = new View(this);
+        card.addView(border, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        card.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { openProgram(prog); }
+        });
+        card.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override public void onFocusChange(View v, boolean f) {
+                GradientDrawable b = new GradientDrawable();
+                b.setColor(Color.TRANSPARENT);
+                b.setCornerRadius(dp(8));
+                if (f) b.setStroke(dp(3), Color.WHITE);
+                border.setBackground(b);
+                v.setScaleX(f ? 1.05f : 1f);
+                v.setScaleY(f ? 1.05f : 1f);
+                v.setElevation(f ? dp(10) : 0);
+                if (f) {
+                    final View cardView = v;
+                    scroller.post(new Runnable() {
+                        @Override public void run() {
+                            scroller.smoothScrollTo(Math.max(0, cardView.getLeft() - dp(30)), 0);
+                        }
+                    });
+                }
+            }
+        });
+        row.addView(card);
+    }
+
+    private void openProgram(TvProg prog) {
+        if (prog.intentUri != null && prog.intentUri.length() > 0) {
+            try {
+                Intent i = Intent.parseUri(prog.intentUri, Intent.URI_INTENT_SCHEME);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                return;
+            } catch (Exception ignored) { }
+        }
+        // No usable deep link stored: fall back to SmartTube's home.
+        openYouTubeSection("HomeLauncherActivity");
+    }
+
+    private void loadPosterAsync(final String uriStr, final ImageView target) {
+        if (uriStr == null || uriStr.length() == 0) return;
+        Bitmap cached = posterCache.get(uriStr);
+        if (cached != null) {
+            target.setImageBitmap(cached);
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override public void run() {
+                Bitmap bmp = null;
+                InputStream in = null;
+                try {
+                    if (uriStr.startsWith("http")) {
+                        java.net.HttpURLConnection conn =
+                                (java.net.HttpURLConnection) new java.net.URL(uriStr).openConnection();
+                        conn.setConnectTimeout(5000);
+                        conn.setReadTimeout(5000);
+                        in = conn.getInputStream();
+                    } else {
+                        in = getContentResolver().openInputStream(Uri.parse(uriStr));
+                    }
+                    if (in != null) {
+                        BitmapFactory.Options opts = new BitmapFactory.Options();
+                        opts.inSampleSize = 2;
+                        bmp = BitmapFactory.decodeStream(in, null, opts);
+                    }
+                } catch (Exception ignored) {
+                } finally {
+                    if (in != null) try { in.close(); } catch (Exception ignored) { }
+                }
+                if (bmp != null) {
+                    posterCache.put(uriStr, bmp);
+                    final Bitmap ready = bmp;
+                    target.post(new Runnable() {
+                        @Override public void run() { target.setImageBitmap(ready); }
+                    });
+                }
+            }
+        }).start();
     }
 
     private TextView rowTitle(String text) {
