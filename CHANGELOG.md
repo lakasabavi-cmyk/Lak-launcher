@@ -1,5 +1,24 @@
 # Changelog
 
+## v2.10 — 2026-10-23 (declare READ_EPG_DATA so channel rows actually load)
+
+Field diagnosis on the JMGO N1 (Bonfire OS, Android 11): the v2.8/v2.9
+channel reading returned empty cursors even after SmartTube had
+published its channels and a reference launcher on the same device
+displayed them fine. A permission comparison found the difference —
+the reference launcher holds `com.android.providers.tv.permission.
+READ_EPG_DATA` (granted at install on this firmware), while Lak
+declared no TV-provider permission at all, so the provider filtered
+its rows out for this app (the ADB shell sees the same empty store).
+
+- Manifest now declares `com.android.providers.tv.permission.
+  READ_EPG_DATA` (read-only; the launcher never writes to the TV
+  provider). On firmware that grants it, the published channel rows
+  load; where it is not granted, the rows simply stay empty, exactly
+  as before.
+- No behavior or layout changes. Same signing key as v2.4–v2.9;
+  installs over them.
+
 ## v2.9 — 2026-10-23 (video rows placed per section; SmartTube search)
 
 Layout rework requested by the maintainer after v2.7/v2.8 testing

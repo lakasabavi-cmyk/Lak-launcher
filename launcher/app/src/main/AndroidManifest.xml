@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lakasa.n1launcher"
-    android:versionCode="20"
-    android:versionName="2.9">
+    android:versionCode="21"
+    android:versionName="2.10">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -10,6 +10,12 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Lets the launcher read TV channels and preview programs that
+         apps like SmartTube publish to the system TV provider
+         (content://android.media.tv), so the home screen can show real
+         video tiles. Where the system does not grant it, the channel
+         rows simply stay empty. -->
+    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
     <!-- Lets the launcher read user-installed language packs from
          /sdcard/Lak-Launcher/lang/ (see Lang.java). -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

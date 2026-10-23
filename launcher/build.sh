@@ -65,11 +65,11 @@ if [ ! -f keystore.jks ]; then
 fi
 "$BT/apksigner" sign --ks keystore.jks --ks-pass pass:n1launcher --key-pass pass:n1launcher \
   --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
-  --out output/Lak-Launcher-v2.9.apk "$OUT/app-aligned.apk"
+  --out output/Lak-Launcher-v2.10.apk "$OUT/app-aligned.apk"
 
 echo "== verify =="
-"$BT/apksigner" verify --verbose output/Lak-Launcher-v2.9.apk
-"$BT/aapt2" dump badging output/Lak-Launcher-v2.9.apk | head -5
-sha256sum output/Lak-Launcher-v2.9.apk; ls -l output/Lak-Launcher-v2.9.apk
+"$BT/apksigner" verify --verbose output/Lak-Launcher-v2.10.apk
+"$BT/aapt2" dump badging output/Lak-Launcher-v2.10.apk | head -5
+sha256sum output/Lak-Launcher-v2.10.apk; ls -l output/Lak-Launcher-v2.10.apk
 ls -lh output/
 echo "BUILD OK"
