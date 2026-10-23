@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.9 — 2026-10-23 (video rows placed per section; SmartTube search)
+
+Layout rework requested by the maintainer after v2.7/v2.8 testing
+(v2.7's section cards confirmed on-device to open the right SmartTube
+sections):
+
+- **Home** no longer carries section shortcut cards. Its YouTube rows are
+  video rows only: "YouTube — History" shows just the history channel's
+  videos, "YouTube — Explore" just the suggested/recommended channel's
+  videos (channels are matched by name; unmatched published channels still
+  surface under their own names).
+- **YouTube page** order is now: row 1 suggested videos, row 2 history
+  videos, then Watch Next and any other published channel, and at the
+  bottom one shortcut row — Library, Liked, Subscriptions, Watch Later.
+- **Search pill** opens SmartTube's own search page (the same verified
+  section route the cards use) instead of the system global search, which
+  is decorative on devices without Google services. The pill's label now
+  says what it does in both language packs.
+- New language keys `ytSuggested` / `ytRow3`; `ytRow1` / `ytRow2` values
+  shortened to match the new rows.
+- Same signing key as v2.4–v2.8; installs over them.
+
 ## v2.8 — 2026-10-23 (real video rows from TV channels)
 
 - **The launcher now reads Android TV channels** (`content://android.media.tv`)

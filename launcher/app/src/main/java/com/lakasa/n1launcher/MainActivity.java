@@ -264,7 +264,7 @@ public class MainActivity extends Activity {
             }
         });
         search.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { openGlobalSearch(); }
+            @Override public void onClick(View v) { openYouTubeSection("SearchLauncherActivity"); }
         });
         header.addView(search);
         header.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1f));
@@ -377,7 +377,6 @@ public class MainActivity extends Activity {
         homeVideoBox.setOrientation(LinearLayout.VERTICAL);
         lower.addView(homeVideoBox);
 
-        buildYouTubeRows(lower);
         return scroll;
     }
 
@@ -491,36 +490,26 @@ public class MainActivity extends Activity {
         ytVideoBox = new LinearLayout(this);
         ytVideoBox.setOrientation(LinearLayout.VERTICAL);
         lower.addView(ytVideoBox);
-        buildYouTubeRows(lower);
+        buildShortcutCards(lower);
         return scroll;
     }
 
-    private void buildYouTubeRows(LinearLayout lower) {
-        // YouTube rows: big cards, 4 per row, horizontal scroll
-        lower.addView(rowTitle(t("ytRow1")));
-        HorizontalScrollView row1 = makeCardRow(lower);
-        addBigCard(row1, "↺", t("ytHistory"), t("ytHistorySub"), 0xFF8E2A2A, 0xFF38090E,
-                "HistoryLauncherActivity");
-        addBigCard(row1, "▤", t("ytLibrary"), t("ytLibrarySub"), 0xFF2A4D8E, 0xFF0E1E38,
+    // YouTube page, bottom row: the section shortcuts (Hung's v2.9 spec) —
+    // Library, Liked, Subscriptions, Watch Later. History lives in the
+    // video rows above; Search moved to the header search pill.
+    private void buildShortcutCards(LinearLayout lower) {
+        lower.addView(rowTitle(t("ytRow3")));
+        HorizontalScrollView row = makeCardRow(lower);
+        addBigCard(row, "▤", t("ytLibrary"), t("ytLibrarySub"), 0xFF2A4D8E, 0xFF0E1E38,
                 "PlaylistsLauncherActivity");
-        addBigCard(row1, "♥", t("ytLiked"), t("ytLikedSub"), 0xFF8E2A5E, 0xFF380E24,
+        addBigCard(row, "♥", t("ytLiked"), t("ytLikedSub"), 0xFF8E2A5E, 0xFF380E24,
                 "PlaylistsLauncherActivity");
-        addBigCard(row1, "✓", t("ytSubs"), t("ytSubsSub"), 0xFF2A8E6B, 0xFF0E382A,
+        addBigCard(row, "✓", t("ytSubs"), t("ytSubsSub"), 0xFF2A8E6B, 0xFF0E382A,
                 "SubscriptionsLauncherActivity");
-
-        lower.addView(rowTitle(t("ytRow2")));
-        HorizontalScrollView row2 = makeCardRow(lower);
-        // No Trending card: SmartTube has no Trending launcher activity
-        // (verified in the 32.68 APK); Trending lives in the home sidebar.
-        addBigCard(row2, "🔍", t("ytSearch"), t("ytSearchSub"), 0xFF2A5E8E, 0xFF0E2438,
-                "SearchLauncherActivity");
-        addBigCard(row2, "◷", t("ytWatchLater"), t("ytWatchLaterSub"), 0xFF4A5160, 0xFF171A21,
+        addBigCard(row, "◷", t("ytWatchLater"), t("ytWatchLaterSub"), 0xFF4A5160, 0xFF171A21,
                 "PlaylistsLauncherActivity");
-        addBigCard(row2, "▶", t("ytOpen"), t("ytOpenSub"), 0xFF3A3A3E, 0xFF0A0A0C,
-                "HomeLauncherActivity");
     }
 
-    // Settings page: the three former rail entries as submenu rows.
     private View buildSettingsSection() {
         ScrollView scroll = new ScrollView(this);
         scroll.setVerticalScrollBarEnabled(false);
@@ -746,29 +735,92 @@ public class MainActivity extends Activity {
     }
 
     private void refreshVideoRows() {
-        fillVideoBox(homeVideoBox, false);
-        fillVideoBox(ytVideoBox, true);
+        fillHomeVideoBox();
+        fillYouTubeVideoBox();
     }
 
-    private void fillVideoBox(LinearLayout box, boolean withStatus) {
+    // First published channel whose name matches any keyword.
+    private int findChannelIdx(String... keywords) {
+        for (int i = 0; i < tvChannelNames.size(); i++) {
+            String n = tvChannelNames.get(i) == null
+                    ? "" : tvChannelNames.get(i).toLowerCase(Locale.US);
+            for (String k : keywords) if (n.contains(k)) return i;
+        }
+        return -1;
+    }
+
+    private int historyChannelIdx() {
+        return findChannelIdx("history", "lịch sử", "watched", "recent");
+    }
+
+    private int recoChannelIdx() {
+        int h = historyChannelIdx();
+        String[][] groups = {
+            {"recommend", "suggest", "for you", "đề xuất"},
+            {"explore", "khám phá"},
+            {"home"},
+        };
+        for (String[] g : groups) {
+            int i = findChannelIdx(g);
+            if (i >= 0 && i != h) return i;
+        }
+        return -1;
+    }
+
+    private List<TvProg> progsOf(long channelId) {
+        List<TvProg> out = new ArrayList<TvProg>();
+        for (TvProg p : tvPrograms) if (p.channelId == channelId) out.add(p);
+        return out;
+    }
+
+    // Home (Hung's v2.9 spec): the "YouTube - History" row shows ONLY
+    // history videos; the "YouTube - Explore" row ONLY suggested videos.
+    private void fillHomeVideoBox() {
+        LinearLayout box = homeVideoBox;
         if (box == null) return;
         box.removeAllViews();
-        // One row per channel that actually has videos, in channel order.
-        for (int ci = 0; ci < tvChannelIds.size(); ci++) {
-            long cid = tvChannelIds.get(ci);
-            List<TvProg> progs = new ArrayList<TvProg>();
-            for (TvProg p : tvPrograms) if (p.channelId == cid) progs.add(p);
-            if (progs.isEmpty()) continue;
-            String name = tvChannelNames.get(ci);
-            addVideoRow(box, name != null && name.length() > 0 ? name : "SmartTube", progs);
+        int hi = historyChannelIdx();
+        int ri = recoChannelIdx();
+        if (hi >= 0) addVideoRow(box, t("ytRow1"), progsOf(tvChannelIds.get(hi)));
+        if (ri >= 0) addVideoRow(box, t("ytRow2"), progsOf(tvChannelIds.get(ri)));
+        if (hi < 0 && ri < 0) {
+            // Channel names matched neither bucket: still surface what
+            // was published, under the channels' own names.
+            for (int i = 0; i < tvChannelIds.size(); i++) {
+                List<TvProg> progs = progsOf(tvChannelIds.get(i));
+                if (!progs.isEmpty()) {
+                    String n = tvChannelNames.get(i);
+                    addVideoRow(box, n != null && n.length() > 0 ? n : "SmartTube", progs);
+                }
+            }
+        }
+    }
+
+    // YouTube page (Hung's v2.9 spec): row 1 suggested videos, row 2
+    // history videos, then Watch Next and any other published channel;
+    // the shortcut cards sit statically below this box. When nothing is
+    // shared at all, a status line reports the exact counts read.
+    private void fillYouTubeVideoBox() {
+        LinearLayout box = ytVideoBox;
+        if (box == null) return;
+        box.removeAllViews();
+        int hi = historyChannelIdx();
+        int ri = recoChannelIdx();
+        if (ri >= 0) addVideoRow(box, t("ytSuggested"), progsOf(tvChannelIds.get(ri)));
+        if (hi >= 0) addVideoRow(box, t("ytHistory"), progsOf(tvChannelIds.get(hi)));
+        if (!tvWatchNext.isEmpty()) addVideoRow(box, t("watchNext"), tvWatchNext);
+        for (int i = 0; i < tvChannelIds.size(); i++) {
+            if (i == hi || i == ri) continue;
+            List<TvProg> progs = progsOf(tvChannelIds.get(i));
+            if (!progs.isEmpty()) {
+                String n = tvChannelNames.get(i);
+                addVideoRow(box, n != null && n.length() > 0 ? n : "SmartTube", progs);
+            }
         }
         List<TvProg> orphans = new ArrayList<TvProg>();
         for (TvProg p : tvPrograms) if (!tvChannelIds.contains(p.channelId)) orphans.add(p);
         if (!orphans.isEmpty()) addVideoRow(box, "SmartTube", orphans);
-        if (!tvWatchNext.isEmpty()) addVideoRow(box, t("watchNext"), tvWatchNext);
-        if (withStatus && tvPrograms.isEmpty() && tvWatchNext.isEmpty()) {
-            // Visible diagnostics: the counts say whether SmartTube has not
-            // published anything yet or the provider refused the read.
+        if (tvPrograms.isEmpty() && tvWatchNext.isEmpty()) {
             TextView st = new TextView(this);
             String counts = " [channels " + tvChannelIds.size()
                     + " / videos " + tvPrograms.size()

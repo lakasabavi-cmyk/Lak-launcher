@@ -32,7 +32,7 @@ China-domestic JMGO projectors ship with Bonfire OS in Chinese only: no English 
 | Part | Status |
 |---|---|
 | Launcher as default Home on a real China-domestic JMGO N1 | ✅ Verified on the maintainer's unit (running since 2026-10-22) |
-| v2.8 (this code): TV channel video rows | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
+| v2.9 (this code): video rows per section + SmartTube search | 🧪 Built and signature-verified; on-device confirmation pending — see CHANGELOG |
 | Debloat lists for Bonfire OS | 🚧 Candidates collected in `data/jmgo-n1-bonfire/`, being verified from probe reports |
 | Other models (N1 Pro / N1 Ultra, other brands) | 📋 Planned — submit a probe report, see [Supporting a new device](docs/new-device-support.md) |
 
@@ -53,7 +53,7 @@ Requirements: JDK 17 and the Android SDK (platform 31, build-tools 34). No Gradl
 
 ```sh
 cd launcher
-./build.sh   # produces output/Lak-Launcher-v2.8.apk
+./build.sh   # produces output/Lak-Launcher-v2.9.apk
 ```
 
 See [launcher/BUILDING.md](launcher/BUILDING.md) for signing notes.
